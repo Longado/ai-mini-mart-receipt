@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-mini-mart-receipt"
+version = "0.1.0"
+description = "AI Mini Mart printable token receipts."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name = "AI Mini Mart" }
+]
+
+[project.scripts]
+ai-mini-mart-receipt = "ai_mini_mart_receipt.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ai_mini_mart_receipt = ["assets/*.png"]
