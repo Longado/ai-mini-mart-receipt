@@ -51,6 +51,14 @@ class RenderTest(unittest.TestCase):
         self.assertNotIn("We" + "nge", html)
         self.assertNotIn(("We" + "nge").upper(), html)
 
+    def test_html_receipt_accepts_named_style(self):
+        html = render_html(UsageSnapshot(input_tokens=1, output_tokens=2), "zh-CN", style="ledger")
+        self.assertIn("receipt-document--ledger", html)
+
+    def test_html_receipt_rejects_unknown_style(self):
+        with self.assertRaises(ValueError):
+            render_html(UsageSnapshot(input_tokens=1, output_tokens=2), "zh-CN", style="unknown")
+
 
 class CliTest(unittest.TestCase):
     def test_cli_writes_text_and_html(self):
@@ -70,6 +78,8 @@ class CliTest(unittest.TestCase):
                     "100",
                     "--estimate-usd",
                     "0.25",
+                    "--style",
+                    "ledger",
                     "--write",
                     str(text_path),
                     "--write-html",
@@ -83,7 +93,9 @@ class CliTest(unittest.TestCase):
             )
             self.assertEqual(proc.returncode, 0, proc.stderr)
             self.assertIn("AI MINI MART", text_path.read_text(encoding="utf-8"))
-            self.assertIn("mini-mart-cashier-cache", html_path.read_text(encoding="utf-8"))
+            html = html_path.read_text(encoding="utf-8")
+            self.assertIn("mini-mart-cashier-cache", html)
+            self.assertIn("receipt-document--ledger", html)
 
     def test_public_files_do_not_contain_old_private_brand(self):
         public_files = [
@@ -115,6 +127,18 @@ class ProjectMetadataTest(unittest.TestCase):
         self.assertIn("MIT License", readme)
         self.assertNotIn("No license has been selected yet", readme)
         self.assertIn('license = { text = "MIT" }', pyproject)
+
+    def test_readme_references_screenshot_assets(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for screenshot in (
+            "docs/screenshots/classic.png",
+            "docs/screenshots/compact.png",
+            "docs/screenshots/ledger.png",
+        ):
+            with self.subTest(screenshot=screenshot):
+                self.assertIn(screenshot, readme)
+                self.assertTrue((ROOT / screenshot).is_file())
+        self.assertIn("--style", readme)
 
 
 if __name__ == "__main__":

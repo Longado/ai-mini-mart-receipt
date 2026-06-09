@@ -13,6 +13,7 @@ from .models import UsageSnapshot, parse_timestamp
 
 WIDTH = 48
 TIP_PRESETS = (15, 18, 20)
+RECEIPT_STYLES = ("classic", "compact", "ledger")
 
 
 LABELS = {
@@ -87,6 +88,12 @@ ASCII_LOGO = (
 
 def language_key(language: str) -> str:
     return "zh-CN" if language.lower().startswith("zh") else "en"
+
+
+def normalize_style(style: str) -> str:
+    if style not in RECEIPT_STYLES:
+        raise ValueError(f"unknown receipt style: {style}")
+    return style
 
 
 def visual_width(text: str) -> int:
@@ -350,8 +357,9 @@ def _tip_config(snapshot: UsageSnapshot, language: str) -> dict[str, object]:
     }
 
 
-def render_html(snapshot: UsageSnapshot, language: str = "zh-CN") -> str:
+def render_html(snapshot: UsageSnapshot, language: str = "zh-CN", style: str = "classic") -> str:
     page_lang = language_key(language)
+    style = normalize_style(style)
     tip_config = {
         "defaultLanguage": page_lang,
         "labels": {
@@ -381,10 +389,14 @@ def render_html(snapshot: UsageSnapshot, language: str = "zh-CN") -> str:
     :root {{ --paper: #fff; --ink: #151515; --page: #ececec; --receipt-width: 80mm; }}
     * {{ box-sizing: border-box; }}
     body {{ margin: 0; padding: 12px 0 24px; background: var(--page); color: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }}
+    .receipt-document--compact {{ --receipt-width: 72mm; --page: #f6f6f6; }}
+    .receipt-document--ledger {{ --page: #e5e5e5; }}
     .print-toolbar {{ display: flex; justify-content: center; margin-bottom: 12px; }}
     .print-button {{ border: 0; border-radius: 999px; padding: 10px 18px; background: #1b1c1f; color: #fff; font: inherit; cursor: pointer; }}
     .receipt-page {{ display: flex; flex-direction: column; align-items: center; gap: 10px; }}
     .receipt {{ width: min(var(--receipt-width), calc(100vw - 24px)); background: var(--paper); padding: 7mm 4mm 5mm; overflow: hidden; }}
+    .receipt-document--compact .receipt {{ padding: 4.8mm 3.2mm 4.2mm; }}
+    .receipt-document--ledger .receipt {{ border: .45mm solid var(--ink); padding: 6mm 4mm 4.8mm; }}
     .receipt--hidden {{ display: none; }}
     .receipt-header, .receipt-footer {{ text-align: center; }}
     .receipt-logo-shell {{ min-height: 26mm; display: flex; align-items: center; justify-content: center; }}
@@ -394,6 +406,18 @@ def render_html(snapshot: UsageSnapshot, language: str = "zh-CN") -> str:
     .receipt-rule {{ border-top: .35mm solid var(--ink); margin: 3.5mm 0; }}
     .receipt-rule.strong {{ border-top-width: .55mm; }}
     .receipt-row {{ display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4mm; font-size: 3.45mm; line-height: 1.32; }}
+    .receipt-document--compact .receipt-logo-shell {{ min-height: 18mm; }}
+    .receipt-document--compact .receipt-logo-image {{ width: 18mm; }}
+    .receipt-document--compact .receipt-logo-label {{ margin-top: 1.8mm; font-size: 3.8mm; }}
+    .receipt-document--compact .receipt-thanks, .receipt-document--compact .receipt-meta {{ font-size: 2.85mm; }}
+    .receipt-document--compact .receipt-rule {{ margin: 2.4mm 0; }}
+    .receipt-document--compact .receipt-row {{ font-size: 3.05mm; line-height: 1.24; gap: 2.4mm; }}
+    .receipt-document--ledger .receipt-logo-shell {{ min-height: 24mm; border: .25mm solid var(--ink); margin-bottom: 2.4mm; }}
+    .receipt-document--ledger .receipt-logo-label {{ border-top: .25mm solid var(--ink); border-bottom: .25mm solid var(--ink); padding: 1.2mm 0; }}
+    .receipt-document--ledger .receipt-rule {{ border-top: .25mm double var(--ink); margin: 2.8mm 0; }}
+    .receipt-document--ledger .receipt-rule.strong {{ border-top-width: .55mm; }}
+    .receipt-document--ledger .receipt-row {{ border-bottom: .2mm solid var(--ink); padding: 1.05mm 0; }}
+    .receipt-document--ledger .receipt-total .receipt-row, .receipt-document--ledger .receipt-tip-summary .receipt-row {{ border-bottom-width: .35mm; }}
     .receipt-total {{ font-weight: 700; }}
     .receipt-footer-line {{ font-size: 3.55mm; line-height: 1.35; overflow-wrap: break-word; }}
     .receipt-barcode {{ margin: 3.6mm 0 1.4mm; font-size: 3.15mm; line-height: 1; overflow: hidden; }}
@@ -413,7 +437,7 @@ def render_html(snapshot: UsageSnapshot, language: str = "zh-CN") -> str:
     @media print {{ body {{ background: #fff; padding: 0; }} .print-toolbar, .receipt-language-panel, .receipt-tip-panel {{ display: none; }} .receipt {{ width: var(--receipt-width); margin: 0 auto; }} }}
   </style>
 </head>
-<body>
+<body class="receipt-document receipt-document--{style}" data-receipt-style="{style}">
   <div class="print-toolbar"><button class="print-button" type="button" onclick="window.print()">Print receipt</button></div>
   <main class="receipt-page">
     {articles}

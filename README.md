@@ -7,12 +7,19 @@ page.
 The first theme is `AI MINI MART`: a monochrome cashier counter, a round title
 row, tip presets, a custom tip input, and a `PAID` pixel stamp.
 
+## Screenshots
+
+| Classic | Compact | Ledger |
+| --- | --- | --- |
+| ![Classic receipt style](docs/screenshots/classic.png) | ![Compact receipt style](docs/screenshots/compact.png) | ![Ledger receipt style](docs/screenshots/ledger.png) |
+
 ## Quick Start
 
 ```bash
 /usr/bin/python3 scripts/generate_assets.py
-/usr/bin/python3 -m unittest discover -s tests -v
-/usr/bin/python3 -m ai_mini_mart_receipt.cli \
+/usr/bin/python3 scripts/generate_screenshots.py
+PYTHONPATH=src /usr/bin/python3 -m unittest discover -s tests -v
+PYTHONPATH=src /usr/bin/python3 -m ai_mini_mart_receipt.cli \
   --provider OPENAI \
   --model gpt-5.5 \
   --input-tokens 147880 \
@@ -22,6 +29,7 @@ row, tip presets, a custom tip input, and a `PAID` pixel stamp.
   --context-window 258400 \
   --estimate-usd 0.823218 \
   --language zh-CN \
+  --style classic \
   --write /tmp/ai-mini-mart-receipt.txt \
   --write-html /tmp/ai-mini-mart-receipt.html
 ```
@@ -33,6 +41,7 @@ receipt layout.
 
 - `15% / 18% / 20%` tip presets.
 - A custom tip percentage input in the HTML print view.
+- HTML receipt styles: `classic`, `compact`, and `ledger`.
 - Round titles:
   - `缓存达人` when cache read is at least 80% of input tokens.
   - `预算警报` when total tokens are at least 100,000 or estimate is at least $0.50.
