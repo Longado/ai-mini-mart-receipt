@@ -141,6 +141,23 @@ class ProjectMetadataTest(unittest.TestCase):
                 self.assertTrue((ROOT / screenshot).is_file())
         self.assertIn("--style", readme)
 
+    def test_readme_has_install_usage_and_development_sections(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("## Install", readme)
+        self.assertIn("## Usage", readme)
+        self.assertIn("## Options", readme)
+        self.assertIn("## Development", readme)
+        self.assertIn("git clone https://github.com/Longado/ai-mini-mart-receipt.git", readme)
+        self.assertIn("/usr/bin/python3 -m pip install .", readme)
+        self.assertIn("/usr/bin/python3 -m pip install --upgrade pip", readme)
+        self.assertIn("/usr/bin/python3 -m pip install -e .", readme)
+        self.assertIn("ai-mini-mart-receipt \\", readme)
+        self.assertIn("It does not call provider APIs", readme)
+
+        quick_start = readme.split("## Quick Start", 1)[1].split("## Usage", 1)[0]
+        self.assertNotIn("generate_screenshots.py", quick_start)
+        self.assertNotIn("unittest discover", quick_start)
+
 
 class ScreenshotGeneratorTest(unittest.TestCase):
     def test_paid_stamp_text_is_centered_inside_stamp(self):
