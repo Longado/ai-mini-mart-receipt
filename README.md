@@ -51,5 +51,4 @@ tests/                  Unit tests and CLI smoke tests
 
 ## License
 
-No license has been selected yet. Add a license before publishing this as a
-public reusable open-source project.
+MIT License. See `LICENSE`.

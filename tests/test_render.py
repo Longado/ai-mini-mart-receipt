@@ -104,5 +104,18 @@ class CliTest(unittest.TestCase):
                 self.assertNotIn(marker.lower(), text)
 
 
+class ProjectMetadataTest(unittest.TestCase):
+    def test_project_declares_mit_license(self):
+        license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+        self.assertIn("MIT License", license_text)
+        self.assertIn("Copyright (c) 2026 AI Mini Mart", license_text)
+        self.assertIn("MIT License", readme)
+        self.assertNotIn("No license has been selected yet", readme)
+        self.assertIn('license = { text = "MIT" }', pyproject)
+
+
 if __name__ == "__main__":
     unittest.main()
