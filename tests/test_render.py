@@ -8,6 +8,7 @@ from pathlib import Path
 
 from ai_mini_mart_receipt.models import UsageSnapshot
 from ai_mini_mart_receipt.render import render_html, render_text, receipt_state, round_title
+from scripts.generate_screenshots import stamp_text_offset, text_width
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -139,6 +140,17 @@ class ProjectMetadataTest(unittest.TestCase):
                 self.assertIn(screenshot, readme)
                 self.assertTrue((ROOT / screenshot).is_file())
         self.assertIn("--style", readme)
+
+
+class ScreenshotGeneratorTest(unittest.TestCase):
+    def test_paid_stamp_text_is_centered_inside_stamp(self):
+        for scale in (3, 4):
+            with self.subTest(scale=scale):
+                stamp_width = 26 * scale
+                left = stamp_text_offset("PAID", stamp_width, scale)
+                right = stamp_width - left - text_width("PAID", scale)
+                self.assertLessEqual(abs(left - right), scale)
+                self.assertGreater(right, 0)
 
 
 if __name__ == "__main__":

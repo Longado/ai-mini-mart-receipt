@@ -156,6 +156,10 @@ def draw_text(pixels: list[bytearray], x: int, y: int, text: str, scale: int) ->
     return y + 7 * scale
 
 
+def stamp_text_offset(text: str, stamp_width: int, scale: int) -> int:
+    return max(0, (stamp_width - text_width(text, scale)) // 2)
+
+
 def center_text(pixels: list[bytearray], y: int, text: str, scale: int) -> int:
     width = len(pixels[0])
     x = max(0, (width - text_width(text, scale)) // 2)
@@ -231,9 +235,10 @@ def draw_robot(pixels: list[bytearray], x: int, y: int, scale: int) -> None:
 
 
 def draw_stamp(pixels: list[bytearray], x: int, y: int, scale: int) -> None:
-    outline(pixels, x, y, 26 * scale, 16 * scale, 2 * scale)
+    stamp_width = 26 * scale
+    outline(pixels, x, y, stamp_width, 16 * scale, 2 * scale)
     outline(pixels, x + 2 * scale, y + 2 * scale, 22 * scale, 12 * scale, scale)
-    draw_text(pixels, x + 5 * scale, y + 5 * scale, "PAID", scale)
+    draw_text(pixels, x + stamp_text_offset("PAID", stamp_width, scale), y + 5 * scale, "PAID", scale)
 
 
 def png_bytes(pixels: list[bytearray]) -> bytes:
